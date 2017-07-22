@@ -1,5 +1,5 @@
 /**
- * @file gbmc_gnudatabase.c
+ * @file gdbm_gnudatabase.c
  * @author Napat Rungruangbangchan
  * @date 22 July 2017 
  * @brief 
