@@ -122,10 +122,10 @@ int main(int argc, char * argv[]){
 
 	// insert new data
 	if( dtm_insert(&gdbm_fd, &key1, &dat1_in) != 0){
-		fprintf(stderr, "%s(%d) insert error, expect key '%s' is available in database\n", __FUNCTION__, __LINE__, dtm_getdat(&key1));
+		fprintf(stderr, "%s(%d) insert error, expect key '%s' is already already in database\n", __FUNCTION__, __LINE__, dtm_getdat(&key1));
 	}
 	if( dtm_insert(&gdbm_fd, &key2, &dat2_in) != 0){
-		fprintf(stderr, "%s(%d) insert error, expect key '%s' is available in database\n", __FUNCTION__, __LINE__, dtm_getdat(&key2));
+		fprintf(stderr, "%s(%d) insert error, expect key '%s' is already already in database\n", __FUNCTION__, __LINE__, dtm_getdat(&key2));
 	}
 
 	// retrieve data back and print
