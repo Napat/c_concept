@@ -1,8 +1,42 @@
 
-all: FORCE
-	gcc -o a.out *.c -Wall -Werror -lgdbm
+TOP_DIR = $(shell pwd)
+export TOP_DIR
 
-clean: FORCE
-	rm *.out
+include $(TOP_DIR)/*.mk
+COMMON_FLAG += 
 
-FORCE:
+OUTPUT_DIR=${PWD}/output
+INSTALL_PATH=~/tmp
+# STATIC_LIBS_DIR := <somewhere>/lib
+# STATIC_LIBS := $(STATIC_LIBS_DIR)/lib$(PLATFORM).a
+# DYNAMIC_LIBS_DIR := <somewhere>/$(PLATFORM)/lib
+# LIB_FLAGS := $(COMMON_FLAG) -lpthread -lmsgsys -L$(DYNAMIC_LIBS_DIR)
+LIB_FLAGS := $(COMMON_FLAG) -lgdbm
+
+BIN = sgdbm
+
+SRCS = $(wildcard *.c)
+OBJS = $(patsubst %.c,%.o,$(SRCS))
+
+all: $(BIN) output
+	
+sgdbm: $(OBJS) 	
+	$(CC) $(OBJS) $(STATIC_LIBS) -o $@  $(LIB_FLAGS)
+
+makedir: .FORCE
+	mkdir -p $(OUTPUT_DIR)
+	mkdir -p $(INSTALL_PATH)
+
+output: makedir	
+	mv $(BIN) $(OBJS) $(OUTPUT_DIR)
+
+clean: .FORCE
+	rm -rf *.out *.o $(BIN) $(OUTPUT_DIR)
+
+install: makedir
+	cp $(OUTPUT_DIR)/sgdbm $(INSTALL_PATH)/sgdbm
+
+%.o: %.c
+	$(CC) $(LIB_FLAGS) -c -o $@ $<
+
+.FORCE:

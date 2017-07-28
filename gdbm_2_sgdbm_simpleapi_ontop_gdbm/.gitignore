@@ -1,2 +1,4 @@
 *.out
 *.gdbm
+*.o
+output/
