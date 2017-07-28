@@ -102,3 +102,32 @@ int sgdbm_del(GDBM_FILE gdbm_fd, char * key){
 	return dtm_delete(&gdbm_fd, &key_datum);
 }
 
+/**
+ * @brief Next key
+ * 
+ * @return next key string, return NULL if end of database
+ */
+char * sgdbm_key_next(GDBM_FILE gdbm_fd, char * key, datum * pkey_datum_out){	
+	if(key[0] == 0){
+		// firstkey
+		*pkey_datum_out = dtm_key_first(gdbm_fd);
+
+		if(dtm_getdat(pkey_datum_out) == NULL){
+			fprintf(stdout, "Database is empty!!\n\n");
+			return  NULL;
+		}
+
+		strcpy(key, dtm_getdat(pkey_datum_out));
+		return key;
+	}else{
+		// nextkey
+		dtm_set(pkey_datum_out , key, strlen(key)+1);	
+		*pkey_datum_out = dtm_key_next(gdbm_fd, *pkey_datum_out);
+		if(dtm_getdat(pkey_datum_out) == NULL){
+			fprintf(stdout, "End of database!!\n\n");
+			return  NULL;
+		}		
+	}
+	strcpy(key, dtm_getdat(pkey_datum_out));
+	return key;
+}

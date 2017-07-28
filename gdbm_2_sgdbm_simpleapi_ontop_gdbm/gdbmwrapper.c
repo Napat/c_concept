@@ -117,3 +117,21 @@ datum dtm_retrieve(GDBM_FILE * gdbm_fd, datum * key){
 int dtm_delete(GDBM_FILE * gdbm_fd, datum * key){
 	return gdbm_delete(*gdbm_fd, *key);
 }
+
+/**
+ * @brief Get first key of data in db
+ *
+ * @return on success return datum of firstkey
+ */
+datum dtm_key_first(GDBM_FILE gdbm_fd){
+	return gdbm_firstkey(gdbm_fd);
+}
+
+/**
+ * @brief Get next key of data in db
+ *
+ * @return on success return datum of nextkey
+ */
+datum dtm_key_next(GDBM_FILE gdbm_fd, datum current_key){
+	return gdbm_nextkey(gdbm_fd, current_key);
+}

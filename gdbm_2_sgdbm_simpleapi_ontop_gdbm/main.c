@@ -23,7 +23,7 @@ void sdb_help(){
 				" ./binary update key1 2 fname lname city 1987\n"
 				" ./binary delete key1\n" 
 				" ./binary show key1\n"
-				// " ./binary showall\n"
+				" ./binary showall\n"
 			);
 }
 
@@ -86,19 +86,23 @@ int main(int argc, char * argv[]){
 			fprintf(stdout, "\t city: %s\n", srec.city);
 			fprintf(stdout, "\t yearofbirth: %d\n", srec.yearofbirth);		
 			fprintf(stdout, "\n");	
-//
-//		}else if(argc > 1 && !strcmp(argv[1], "showall")) {
-//			// ./binary showall
-//			off_t curpos = 0;			
-//			gdbm_fd = sdb_open_append(DB_FILENAME);
-//			while( sdb_record_getnext(gdbm_fd,&srec, &curpos) > 0){
-//				fprintf(stdout, "key id: %d\n", srec.id);
-//				fprintf(stdout, "firstname: %s\n", srec.firstname);	
-//				fprintf(stdout, "lastname: %s\n", srec.lastname);	
-//				fprintf(stdout, "city: %s\n", srec.city);
-//				fprintf(stdout, "yearofbirth: %d\n", srec.yearofbirth);		
-//				fprintf(stdout, "\n");
-//			}
+
+		}else if(argc > 1 && !strcmp(argv[1], "showall")) {
+			// ./binary showall
+			datum key_datum;		
+			gdbm_fd = sgdbm_open(DB_FILENAME);
+			//char * sgdbm_key_next(GDBM_FILE gdbm_fd, char * key, datum * pkey_datum_out)
+			key[0] = 0;
+			while( sgdbm_key_next(gdbm_fd, key, &key_datum) != NULL){
+				sgdbm_get(gdbm_fd, key, &srec);
+				fprintf(stdout, "KEY: %s\n", key);
+				fprintf(stdout, "\t id: %d\n", srec.id);
+				fprintf(stdout, "\t firstname: %s\n", srec.firstname);	
+				fprintf(stdout, "\t lastname: %s\n", srec.lastname);	
+				fprintf(stdout, "\t city: %s\n", srec.city);
+				fprintf(stdout, "\t yearofbirth: %d\n", srec.yearofbirth);		
+				fprintf(stdout, "\n");
+			}
 
 		}else{
 			fprintf(stderr, "Error!! bad command or argument\n\n");

@@ -64,4 +64,11 @@ int sgdbm_get(GDBM_FILE gdbm_fd, char * key, sgdbm_record_t * srec);
  */
 int sgdbm_del(GDBM_FILE gdbm_fd, char * key);
 
+/**
+ * @brief Next key
+ * 
+ * @return next key string, return NULL if end of database
+ */
+char * sgdbm_key_next(GDBM_FILE gdbm_fd, char * key, datum * pkey_datum_out);
+
 #endif /* __SGDB_H__ */
