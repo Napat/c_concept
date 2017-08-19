@@ -1,0 +1,10 @@
+{
+    "name": "ASUS (\"Monitor\") MX34VQ",
+    "monitor": {
+        "type":       		"IPS",
+        "width":      		3440,
+        "height":     		1440,
+        "interlace_vga":  	false,
+        "frame rate": 		100
+    }
+}
