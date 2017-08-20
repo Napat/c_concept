@@ -1,5 +1,11 @@
-// rtcdate.h
-// 
+/**
+ * @file rtcdate.c
+ * @author Napat Rungruangbangchan
+ * @date 14 Aguent 2017 
+ * @brief This file is part of misc driver sample
+ * @Compiler: 
+ * @License: 
+ */
 
 #ifndef __RTCDATE_H__
 #define __RTCDATE_H__
@@ -16,8 +22,15 @@ typedef struct rtcdate_s{
 	U8INT_RTC dayofweek;	// dayofweek: 1-7: user-defined but must be sequential,i.e., 1: Sunday 2: Monday ...	
 }rtcdate_t;
 
+typedef struct rtcdev_arg_s{
+	int 	iserr;
+	void* 	api_arg;
+}rtcdev_arg_t;
+
 #define	RTC_IOCTL_BASE	'p'
 #define	RTC_GETTIME		_IOR(RTC_IOCTL_BASE, 	0, rtcdate_t)
 #define RTC_SETTIME		_IOWR(RTC_IOCTL_BASE, 	1, rtcdate_t)	
+
+#define NODENAME	("miscdrv_template")
 
 #endif /* __RTCDATE_H__ */
