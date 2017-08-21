@@ -1,0 +1,6 @@
+*.out
+*.gdbm
+*.o
+output/
+
+cJSON

@@ -75,7 +75,7 @@ static void example01(){
 	return;	
 }
 
-static int getjsonstr_alloc(char * filename, char ** out_pjsonstr){
+static int alltxtfromfile_alloc(char * filename, char ** out_pstr){
 	FILE *fp = fopen(filename, "r");
 	int ret = -1;
 
@@ -89,7 +89,7 @@ static int getjsonstr_alloc(char * filename, char ** out_pjsonstr){
 	    	}
 
 	        /* Allocate our buffer to that size. */
-	        *out_pjsonstr = malloc(sizeof(char) * (bufsize + 1));
+	        *out_pstr = malloc(sizeof(char) * (bufsize + 1));
 
 	        /* Go back to the start of the file. */
 	        if (fseek(fp, 0L, SEEK_SET) != 0){ 
@@ -97,11 +97,11 @@ static int getjsonstr_alloc(char * filename, char ** out_pjsonstr){
 	        }
 
 	        /* Read the entire file into memory. */
-	        size_t newLen = fread(*out_pjsonstr, sizeof(char), bufsize, fp);
+	        size_t newLen = fread(*out_pstr, sizeof(char), bufsize, fp);
 	        if ( ferror( fp ) != 0 ){	            
 				fprintf(stderr, "%s(%d) Error reading file %s\r\n", __FUNCTION__, __LINE__, filename);	            
 	        } else {
-	            (*out_pjsonstr)[newLen++] = '\0'; /* Just to be safe. */
+	            (*out_pstr)[newLen++] = '\0'; /* Just to be safe. */
 	            ret = 0;
 	        }
 	    }
@@ -121,7 +121,7 @@ static void example02(){
 	cJSON *name , *type, *width, *height, *interlace_vga, *framerate;
 	buyitem_t btime;
 
-	getjsonstr_alloc("data.json", &jsonstr);
+	alltxtfromfile_alloc("data.json", &jsonstr);
 	//printf("%s(%d)\r\n%s.....\r\n", __FUNCTION__, __LINE__, jsonstr);
 
 	root 	= cJSON_Parse(jsonstr);
@@ -170,8 +170,10 @@ static void example02(){
 	  fprintf(stdout, "framerate = %lf\r\n", btime.monitor.framerate);
 	}
 
-	free(jsonstr);
-	jsonstr = NULL;
+	if(jsonstr != NULL){
+		free(jsonstr);
+		jsonstr = NULL;
+	}
 }
 
 int main(int argc, char * argv[]){
