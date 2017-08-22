@@ -15,7 +15,7 @@
 
 #define STARTCONFIG_FILE	"cfgstart.json"
 
-typedef enum {
+typedef enum{
 	  PORT_TYPE_NONE		= 0
 	, PORT_TYPE_PHYSICAL
 	, PORT_TYPE_AGGREATE
@@ -25,7 +25,7 @@ typedef enum {
 
 #define PORTNAME_MAXLEN			(30)		
 
-typedef struct monitor_s {
+typedef struct monitor_s{
 	char	port_name[PORTNAME_MAXLEN];
 	bool 	port_enable;
 	int		port_type;					// port_type_t	
@@ -35,24 +35,32 @@ typedef struct monitor_s {
 #define PORT_COUNT 				(4)	// example switch 4 ports
 #define TELNET_SESSION_MAX		(4)
 
-typedef struct switchconfig_s {
+typedef enum{ 	
+	FAN_1,
+	FAN_2, 
+
+	FAN_COUNT
+}fanx_t; 
+
+typedef struct switchconfig_s{
 	char	name[SWITCHNAME_MAXLEN];
 	bool 	snmp_enable;
 	bool 	telnet_enable[TELNET_SESSION_MAX];
+	bool 	fan_enable[FAN_COUNT];
 	port_t 	ports[PORT_COUNT];
-
 } switchconfig_t;
 
 /* config json should be look like,
 {
 	"name": "bangkok01",
 	"snmp_enable": "true",
-	"telnet_enable": {		
+	"telnet_enable":{		
 		"1":	"true",	
 		"2":	"true",	
 		"3":	"false",	
 		"4":	"false"		
 	},
+	"fan_enable": [1, 1],
 	"ports": [
 		{	
 			"port_name":	"port01",
@@ -86,6 +94,11 @@ static void setdefaultconfig(switchconfig_t *cfg){
 	for (counter = 0; counter < TELNET_SESSION_MAX; ++counter){
 		cfg->telnet_enable[counter] = true;
 	}
+
+	for (counter = 0; counter < FAN_COUNT; ++counter){
+		cfg->fan_enable[counter] = true;
+	}	
+
 	for (counter = 0; counter < PORT_COUNT; ++counter){
 		port_t *port = &(cfg->ports[counter]);
 		
@@ -127,6 +140,11 @@ int switchcfgrun_telnet_enable_set(switchconfig_t *swcfgrun, int idx, bool enabl
 	return 0;
 }
 
+int switchcfgrun_fan_enable_set(switchconfig_t *swcfgrun, fanx_t idx, bool enable){
+	swcfgrun->fan_enable[idx] = enable;
+	return 0;
+}
+
 int switchcfgrun_port_name_set(switchconfig_t *swcfgrun, int idx, char *in_name){
 	strncpy(swcfgrun->ports[idx].port_name, in_name, PORTNAME_MAXLEN);
 	return 0;
@@ -149,8 +167,11 @@ static int cfgtojsonstr(char **out_jsonstr, switchconfig_t *cfg){
 
 	cJSON *root = NULL;
 	cJSON *telnet_enable = NULL;
+	cJSON *fan_enable = NULL;
 	cJSON *ports = NULL;
 	cJSON *port_info = NULL;
+	cJSON *number = NULL;
+
 
 	root = cJSON_CreateObject();
 
@@ -174,6 +195,13 @@ static int cfgtojsonstr(char **out_jsonstr, switchconfig_t *cfg){
 			cJSON_AddFalseToObject(telnet_enable, str);
 		}
 	}
+
+	// fan_enable
+	cJSON_AddItemToObject(root, "fan_enable", fan_enable = cJSON_CreateArray());	
+    for (counter = 0; counter < FAN_COUNT; counter++){
+    	number = cJSON_CreateNumber(cfg->fan_enable[counter]);
+    	cJSON_AddItemToArray(fan_enable, number);
+	}	
 
 	// ports[]
 	cJSON_AddItemToObject(root, "ports", ports = cJSON_CreateArray());
@@ -204,7 +232,7 @@ static int cfgtojsonstr(char **out_jsonstr, switchconfig_t *cfg){
 static int write_stringtofile(char *str, char *filename){
 	FILE *fd = fopen(filename, "w");
 	if (fd == NULL){
-	    fprintf(stderr, "%s(%d) error opening file: %s\r\n", __FUNCTION__, __LINE__, STARTCONFIG_FILE);
+	    fprintf(stderr, "%s(%d) error opening file: %s\r\n", __FUNCTION__, __LINE__, filename);
 	    return -1;
 	}
 
@@ -238,7 +266,7 @@ static int alltxtfromfile_alloc(char * filename, char ** out_pstr){
 	        size_t newLen = fread(*out_pstr, sizeof(char), bufsize, fp);
 	        if ( ferror( fp ) != 0 ){	            
 				fprintf(stderr, "%s(%d) Error reading file %s\r\n", __FUNCTION__, __LINE__, filename);	            
-	        } else {
+	        } else{
 	            (*out_pstr)[newLen++] = '\0'; /* Just to be safe. */
 	            ret = 0;
 	        }
@@ -266,7 +294,7 @@ static int jsonstrtorun_apply(switchconfig_t *cfg, char *jsonstr){
 	int counter;
 	cJSON *root 			= NULL;
 	cJSON *name, *snmp_enable;
-	cJSON *telnet_enable, *ports;
+	cJSON *telnet_enable, *fan_enable, *ports;
 
 	root 	= cJSON_Parse(jsonstr);
 
@@ -304,6 +332,27 @@ static int jsonstrtorun_apply(switchconfig_t *cfg, char *jsonstr){
 	}else{
 		fprintf(stderr, "%s(%d) error field telnet_enable\r\n", __FUNCTION__, __LINE__);
 	}	
+
+	// fan_enable
+	fan_enable = cJSON_GetObjectItemCaseSensitive(root, "fan_enable");
+	if(cJSON_IsArray(fan_enable)){
+		cJSON *fan;
+		counter = 0;
+		cJSON_ArrayForEach(fan, fan_enable){
+
+			if(cJSON_IsNumber(fan)){				
+				cfg->fan_enable[counter] = fan->valueint?true:false;
+			}else{
+				fprintf(stderr, "%s(%d) fan_enable[%d]: %d\r\n"
+						, __FUNCTION__, __LINE__
+						, counter, cJSON_IsNumber(fan)
+						);
+			}
+			counter++;
+		}
+	}else{
+		fprintf(stderr, "%s(%d) error field telnet_enable\r\n", __FUNCTION__, __LINE__);
+	}
 
 	// ports
 	ports = cJSON_GetObjectItemCaseSensitive(root, "ports");
@@ -378,6 +427,7 @@ static int print_runinfo(switchconfig_t *cfg){
 					"\t name: %s\r\n"
 					"\t snmp_enable: %d\r\n"
 					"\t telnet_enable: %d/%d/%d/%d\r\n"
+					"\t fan_enable: %d/%d\r\n"
 					"\t port[0]: name:%s status:%d type:%d\r\n"
 					"\t port[1]: name:%s status:%d type:%d\r\n"
 					"\t port[2]: name:%s status:%d type:%d\r\n"
@@ -387,6 +437,7 @@ static int print_runinfo(switchconfig_t *cfg){
 					, cfg->name
 					, cfg->snmp_enable
 					, cfg->telnet_enable[0], cfg->telnet_enable[1], cfg->telnet_enable[2], cfg->telnet_enable[3]
+					, cfg->fan_enable[0], cfg->fan_enable[1]
 					, cfg->ports[0].port_name, cfg->ports[0].port_enable, cfg->ports[0].port_type
 					, cfg->ports[1].port_name, cfg->ports[1].port_enable, cfg->ports[1].port_type
 					, cfg->ports[2].port_name, cfg->ports[2].port_enable, cfg->ports[2].port_type
@@ -399,14 +450,15 @@ static int print_runinfo(switchconfig_t *cfg){
 int main(int argc, char *argv[]){
 
 	// TODO
-	// 1. bias running config with defult config	
+	// 1. bias running config with defult config and print running info	
 	// 2. save running config to file name cfgstart.json
-	// 3. change "some_field" of running config and print "some_field"
-	// 4. load cfgstart.json to running config and print "some_field"
+	// 3. change "some_field" of running config and print running info
+	// 4. load cfgstart.json to running config and print running info
 
 	// 1.
 	fprintf(stdout, "\r\n%s(%d) ---STEP 1---\r\n", __FUNCTION__, __LINE__);
 	switchcfg_run();
+	print_runinfo(switchcfg_run());
 
 	// 2.
 	fprintf(stdout, "\r\n%s(%d) ---STEP 2---\r\n", __FUNCTION__, __LINE__);
@@ -420,6 +472,8 @@ int main(int argc, char *argv[]){
 	switchcfgrun_telnet_enable_set(switchcfg_run(), 1, true);
 	switchcfgrun_telnet_enable_set(switchcfg_run(), 2, false);
 	switchcfgrun_telnet_enable_set(switchcfg_run(), 3, false);
+	switchcfgrun_fan_enable_set(switchcfg_run(), FAN_1, true);
+	switchcfgrun_fan_enable_set(switchcfg_run(), FAN_2, false);
 	switchcfgrun_port_name_set(switchcfg_run(), 0, "p1");
 	switchcfgrun_port_enable_set(switchcfg_run(), 0, true);
 	switchcfgrun_port_type_set(switchcfg_run(), 0, PORT_TYPE_PHYSICAL);		
