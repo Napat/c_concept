@@ -241,7 +241,7 @@ static int write_stringtofile(char *str, char *filename){
 	return 0;
 }
 
-static int alltxtfromfile_alloc(char * filename, char ** out_pstr){
+static int read_stringfromfile_alloc(char * filename, char ** out_pstr){
 	FILE *fp = fopen(filename, "r");
 	int ret = -1;
 
@@ -407,7 +407,7 @@ int load_starttorun(switchconfig_t *cfg){
 	char * 	jsonstr 	= NULL;
 
 	// load file to json string buf
-	alltxtfromfile_alloc(STARTCONFIG_FILE, &jsonstr);
+	read_stringfromfile_alloc(STARTCONFIG_FILE, &jsonstr);
 	//printf(".....%s\r\n", jsonstr);
 
 	// set json string buf to running 
