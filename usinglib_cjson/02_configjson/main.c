@@ -351,7 +351,7 @@ static int jsonstrtorun_apply(switchconfig_t *cfg, char *jsonstr){
 			counter++;
 		}
 	}else{
-		fprintf(stderr, "%s(%d) error field telnet_enable\r\n", __FUNCTION__, __LINE__);
+		fprintf(stderr, "%s(%d) error field fan_enable\r\n", __FUNCTION__, __LINE__);
 	}
 
 	// ports
