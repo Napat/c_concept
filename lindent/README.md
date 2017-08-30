@@ -1,4 +1,13 @@
+## Lindent: indentation for C coder
+Info:   
+https://ruckuus.wordpress.com/2010/03/15/lindent-amazing-script-for-lazy-c-coder/  
+https://github.com/torvalds/linux/blob/master/scripts/Lindent  
 
+## Basic usage  
+`./Lindent test.c -o test.c`  
+or   
+see sample project and example below
+  
 ```
 $ cat test.c
 #include <stdio.h>
