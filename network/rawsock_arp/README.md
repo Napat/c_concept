@@ -1,4 +1,4 @@
 # ARP request and reply api using RAW socket  
-Please using packet capture to examine api.  
+Please use network capture tools for examine the API.  
   
   
