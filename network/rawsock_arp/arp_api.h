@@ -11,6 +11,7 @@
 #define __ARP_API_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 //#include <linux/types.h>
 
 #define PROTO_ARP 		0x0806
@@ -35,7 +36,12 @@ struct arp_header{
         unsigned char 	target_ip[IPV4_LENGTH];
 };
 
+// who has [target_ip], tell [source_ip]
 int32_t arp_request(char* intf_name, uint8_t* target_ip, uint8_t* source_ip);
+
+// tx: [source_ip] is at [mac address of intf_name]
+int32_t arp_reply_bcastip(char* intf_name, uint8_t* source_ip);
 int32_t arp_reply(char* intf_name, uint8_t* source_ip);
+int32_t arp_reply_target(char* intf_name, uint8_t* source_ip, uint8_t* target_ip);
 
 #endif /* __ARP_API_H__ */
