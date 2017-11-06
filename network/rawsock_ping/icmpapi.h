@@ -9,6 +9,6 @@
 
 #ifndef PING_INC_GUARD
 #define PING_INC_GUARD
-int ping(char *dst_addr,char *src_addr,int timeout_ms);
-//char* getip();		//BUG!!!
+int ping(char *src_addr, char *dst_addr, int payloadlen, int timeout_ms);
+//char* getip();		// not implement yet! : use to get source ip address
 #endif

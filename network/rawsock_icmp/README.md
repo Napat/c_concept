@@ -1,5 +1,0 @@
-# RAW SOCK: ping(icmp)  
-  
-
-  
-  
