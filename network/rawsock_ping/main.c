@@ -26,5 +26,9 @@ int main(void){
 
     ret = ping(IP_SRC, IP_DST3, 50, PING_TIMEOUT);
     printf("dst: %s, ret = %d ms.\n", IP_DST3, ret);
+
+    // DoS attack
+    ping_dos(IP_SRC, IP_DST1, 1000, 10000);
+
 	return 0;
 }
