@@ -13,7 +13,9 @@
 int main(int argc, char * argv[]){
 
 	// Call function defined in dynamic lib .so
+	printf("------------------------------------\n");
 	system_printf("ls -al");
+	printf("------------------------------------\n");
 
 	return 0;
 }

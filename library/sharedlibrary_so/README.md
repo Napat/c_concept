@@ -102,12 +102,19 @@ $ ldd app_linked_dynamic_so
         /lib64/ld-linux-x86-64.so.2 (0x00007ff7b9200000)
 $         
 $ ./app_linked_dynamic_so
-total 20
-drwxrwxrwx 2 root root    0 Sep 11 23:07 .
-drwxrwxrwx 2 root root    0 Sep 11 23:08 ..
--rwxrwxrwx 1 root root 8514 Sep 11 23:07 app_linked_dynamic_so
-drwxrwxrwx 2 root root    0 Sep 11 23:07 lib
--rwxrwxrwx 1 root root 1512 Sep 11 23:07 main.o
+total 16
+drwxrwxrwx 0 root root 4096 Nov 14 00:10 .
+drwxrwxrwx 0 root root 4096 Nov 14 00:10 ..
+-rwxrwxrwx 1 root root 8602 Nov 14 00:10 app_linked_dynamic_so
+drwxrwxrwx 0 root root 4096 Nov 14 00:10 lib
+-rwxrwxrwx 1 root root 1792 Nov 14 00:10 main.o
+------------------------------------
+4096 .
+4096 ..
+8602 app_linked_dynamic_so
+4096 lib
+1792 main.o
+------------------------------------
 $
 $
 $ nm app_linked_dynamic_so

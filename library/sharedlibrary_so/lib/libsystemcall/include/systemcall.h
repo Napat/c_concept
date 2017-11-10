@@ -2,12 +2,11 @@
  *	\file systemcall.h
  *	\brief 
  *  Created on: April 3, 2013
- *      Author: Napat Rungruangbangchan
+ *  Author: Napat Rungruangbangchan
  */
 
 #ifndef SYSTEMCALL_H_
 #define SYSTEMCALL_H_
-
 
 //! Handling variadic function of system() function
 /*!
@@ -28,14 +27,14 @@ int system_sync_printf(const char *cmd_va, ...);
  \param filename , full name with file path.
  \return On access success return 1, otherwise return 0.
  */
-int isAccessFile(const char* filename);
+int isaccess_file(const char* filename);
 
 //! To check directory accessable
 /*!
  \param filename , full name with dir path.
  \return On exist return 1, otherwise return 0 or -1.
  */
-int isAccessDir(const char* filename);
+int isaccess_dir(const char* filename);
 
  #endif /* SYSTEMCALL_H_ */
  
