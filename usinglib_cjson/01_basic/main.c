@@ -39,8 +39,8 @@ typedef struct buyitem_s {
 } buyitem_t;
 
 static void example_build_jsonstr(char **out_jsonstr){
-	cJSON *root;
-	cJSON *fmt;
+	cJSON *root = NULL;
+	cJSON *fmt = NULL;
 	
 	root = cJSON_CreateObject();
 	cJSON_AddItemToObject(root, "name", cJSON_CreateString("ASUS (\"Monitor\") MX34VQ"));
@@ -56,6 +56,7 @@ static void example_build_jsonstr(char **out_jsonstr){
 	// free everything associate with root
 	// The exception is cJSON_PrintPreallocated, where return to the caller that has full responsibility of the buffer. */
 	cJSON_Delete(root);	
+	root = NULL;
 
 	return;
 }
@@ -89,9 +90,9 @@ static int alltxtfromfile_alloc(char * filename, char ** out_pstr){
 	    	}
 
 	        /* Allocate our buffer to that size. */
-	        *out_pstr = malloc(sizeof(char) * (bufsize + 1));
+			*out_pstr = (char *)malloc(sizeof(char) * (bufsize + 1));
 
-	        /* Go back to the start of the file. */
+			/* Go back to the start of the file. */
 	        if (fseek(fp, 0L, SEEK_SET) != 0){ 
 	        	fprintf(stderr, "%s(%d) filename: %s SEEK_SET error!!\r\n", __FUNCTION__, __LINE__, filename);
 	        }
@@ -169,6 +170,11 @@ static void example02(){
 	  btime.monitor.framerate = framerate->valuedouble;
 	  fprintf(stdout, "framerate = %lf\r\n", btime.monitor.framerate);
 	}
+
+	// free everything associate with root
+	// The exception is cJSON_PrintPreallocated, where return to the caller that has full responsibility of the buffer. */
+	cJSON_Delete(root);
+	root = NULL;
 
 	if(jsonstr != NULL){
 		free(jsonstr);

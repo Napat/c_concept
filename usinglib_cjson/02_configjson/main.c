@@ -224,9 +224,10 @@ static int cfgtojsonstr(char **out_jsonstr, switchconfig_t *cfg){
 
 	// free everything associate with root
 	// The exception is cJSON_PrintPreallocated, where return to the caller that has full responsibility of the buffer. */
-	cJSON_Delete(root);	
-
-	return ret;	
+	cJSON_Delete(root);
+	root = NULL;
+	
+	return ret;
 }
 
 static int write_stringtofile(char *str, char *filename){
@@ -382,6 +383,12 @@ static int jsonstrtorun_apply(switchconfig_t *cfg, char *jsonstr){
 	}else{
 		fprintf(stderr, "%s(%d) error field ports\r\n", __FUNCTION__, __LINE__);
 	}
+
+	// free everything associate with root
+	// The exception is cJSON_PrintPreallocated, where return to the caller that has full responsibility of the buffer. */
+	cJSON_Delete(root);
+	root = NULL;
+	
 	return 0;
 }
 
