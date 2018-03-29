@@ -51,7 +51,7 @@ static void example_build_jsonstr(char **out_jsonstr){
 	cJSON_AddFalseToObject (fmt, "interlace_vga");
 	cJSON_AddNumberToObject(fmt, "frame rate", 100);
 
-	*out_jsonstr = cJSON_Print(root);
+	*out_jsonstr = cJSON_Print(root); // auto allocate memory ** need to call cJSON_free() to free memory**
 
 	// free everything associate with root
 	// The exception is cJSON_PrintPreallocated, where return to the caller that has full responsibility of the buffer. */
@@ -69,6 +69,12 @@ static void example01(){
 					"%s\r\n"
 					, __FUNCTION__, __LINE__, jsonstr
 					);
+
+	cJSON_Minify(jsonstr);
+
+	fprintf(stdout, "%s(%d) after minify json string: \r\n"
+					"%s\r\n",
+			__FUNCTION__, __LINE__, jsonstr);
 
 	cJSON_free(jsonstr);
 	jsonstr = NULL;
@@ -184,11 +190,12 @@ static void example02(){
 
 int main(int argc, char * argv[]){
 
-	// Example01: build json string
+	// Example01: build json string (similar with serialize c structure to json string) 
+	// & howto minify json string
 	fprintf(stdout, "\r\nExample 01\r\n");
 	example01();
 
-	// Example02: read json & serialize to C Structures
+	// Example02: read json & deserialize to C Structures
 	fprintf(stdout, "\r\nExample 02\r\n");
 	example02();
 
