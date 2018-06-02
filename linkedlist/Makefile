@@ -10,8 +10,7 @@ INSTALL_PATH=~/tmp
 # STATIC_LIBS_DIR := <somewhere>/lib
 # STATIC_LIBS := $(STATIC_LIBS_DIR)/lib$(PLATFORM).a
 # DYNAMIC_LIBS_DIR := <somewhere>/$(PLATFORM)/lib
-# LIB_FLAGS := $(COMMON_FLAG) -lpthread -lmsgsys -L$(DYNAMIC_LIBS_DIR)
-LIB_FLAGS := $(COMMON_FLAG)
+LIB_FLAGS := $(COMMON_FLAG) #-lpthread #-L$(DYNAMIC_LIBS_DIR)
 
 BIN = linklist_datastructure
 

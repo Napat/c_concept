@@ -45,10 +45,4 @@ int lltime_rmbyid(llitem_node_t** head, int id_in, llitem_t* llitem_out);
 llitem_node_t* llitem_setitem_byid(llitem_node_t** head, int id_in, llitem_t* llitem_in);
 llitem_node_t* llitem_setitem_bycmp(llitem_node_t** head, llitem_t* llitem_in, int (*itemcomparator_iseq)(const llitem_t*, const llitem_t*));
 
-////////////////////////////////////////
-// Example comparator functions
-int llitemcompar_iseq_name(const llitem_t* item1, const llitem_t* item2);
-int llitemcompar_iseq_stockcount(const llitem_t* item1, const llitem_t* item2);
-int llitemcompar_iseq_item(const llitem_t* item1, const llitem_t* item2);
-
 #endif /* __LINKLIST_DAT_H__ */

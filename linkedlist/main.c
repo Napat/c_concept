@@ -10,6 +10,12 @@
 #include <stdio.h>
 #include "linklist_item.h"
 
+////////////////////////////////////////
+// Example comparator functions
+int llitemcompar_iseq_name(const llitem_t *item1, const llitem_t *item2);
+int llitemcompar_iseq_stockcount(const llitem_t *item1, const llitem_t *item2);
+int llitemcompar_iseq_item(const llitem_t *item1, const llitem_t *item2);
+
 int main(int argc, char * argv[]){
 	int id;
 	llitem_t llitem_tmp;
