@@ -11,15 +11,15 @@
 #include <stdlib.h>
 #include "circularq.h"
 
-#define QSIZE_SUPPORT		10			// 1 guard band then support 9 buff
-#define QTAIL_PADDING	((QSIZE_SUPPORT*2))
+#define QSIZEBYTE       60      // Note: Put data to Q have some overhead
+#define TESTLOOPDAT		10		// Should error when put dat#10	
 
 int main(){
 	circularq_t ccq;
 	int32_t dat;
 	int32_t idx;
 
-	if( circularq_create(&ccq, (sizeof(dat) * QSIZE_SUPPORT) + QTAIL_PADDING ) != 0){
+	if( circularq_create(&ccq, QSIZEBYTE) != 0){
 		fprintf(stderr, "%s(%d)\n", __FUNCTION__, __LINE__);
 		exit(-1);
 	}
@@ -29,28 +29,32 @@ int main(){
 	printf("--------------------------------\n");
 	
 	// Put data
-	for( idx=0; idx < QSIZE_SUPPORT; idx++){
+	for( idx=0; idx < TESTLOOPDAT; idx++){
 		dat = 1000000+idx+1;
 		if( circularq_putdata(&ccq, (uint8_t*)&dat, sizeof(dat)) <= 0){
-			fprintf(stderr, "Error %s(%d)\n", __FUNCTION__, __LINE__);
-		}
+            fprintf(stderr, "Error %s(%d): %d\n", __FUNCTION__, __LINE__, dat);
+            fflush(stderr);
+        }else{
+            fprintf(stdout, "%s(%d) put data: %d ok! qfreesize: %d\n", __FUNCTION__, __LINE__, dat, circularq_freesize(&ccq));
+        }
 	}
-
+    
 	// Get data 
 	while(circularq_empty(&ccq) != 1){
 		if( circularq_getdata(&ccq, (uint8_t*)&dat) <= 0){
 			fprintf(stderr, "Error %s(%d)\n", __FUNCTION__, __LINE__);
-		}else{
+            fflush(stderr);
+        }else{
 			fprintf(stdout, "%s(%d) dat: %d\n", __FUNCTION__, __LINE__, dat);
 		}
 	}
 
-	/////////////////////////////////////////
+    /////////////////////////////////////////
 	// Test: put q (replace old QData if not space left)
 	printf("--------------------------------\n");
 
 	// Put data
-	for( idx=0; idx < QSIZE_SUPPORT; idx++){
+	for( idx=0; idx < TESTLOOPDAT; idx++){
 		dat = 1000000+idx+1;
 		if( circularq_putdata_replace(&ccq, (uint8_t*)&dat, sizeof(dat)) <= 0){
 			fprintf(stderr, "Error %s(%d)\n", __FUNCTION__, __LINE__);
