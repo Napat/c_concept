@@ -33,7 +33,7 @@ int curl_get_xN() {
     int loop, xN = 3;
     CURL *curl_easy;
     CURLcode res;
-    char url[] = "http://demo6460359.mockable.io/tasks_get/v1/users?name=napat&lastname=roo";
+    char url[] = "https://demo6460359.mockable.io/tasks_get/v1/users?name=napat&lastname=roo";
     curl_easy = curl_easy_init();
     if (curl_easy == NULL) {
         printf("%s(%d) curl_easy_init error: something went wrong %p\n", __FUNCTION__, __LINE__, curl_easy);
@@ -48,7 +48,7 @@ int curl_get_xN() {
     // set http_get
     curl_easy_setopt(curl_easy, CURLOPT_HTTPGET, 1L);
 
-    printf("%s(%d) begin----------------------------------------\n", __FUNCTION__, __LINE__);
+    printf("%s(%d) begin: %s----------------------------------------\n", __FUNCTION__, __LINE__, url);
     for(loop = 0; loop < xN; loop++) {
         // get away #n
         res = curl_easy_perform(curl_easy);
@@ -65,7 +65,7 @@ int curl_post_json_xN() {
     int loop, xN = 3;
     CURL *curl_easy;
     CURLcode res;
-    char url[] = "http://demo6460359.mockable.io/tasks_postjson/v1/users";
+    char url[] = "https://demo6460359.mockable.io/tasks_postjson/v1/users";
     char post_data[] = "username=newuser&password=newpasswd&msg=test&msisdn=9999999999&tagname=Demo&shortcode=8888&telcoId=5&dnRequired=false";
     curl_easy = curl_easy_init();
     if (curl_easy == NULL) {
@@ -84,7 +84,7 @@ int curl_post_json_xN() {
     // set data to post
     curl_easy_setopt(curl_easy, CURLOPT_POSTFIELDS, post_data);
 
-    printf("%s(%d) begin----------------------------------------\n", __FUNCTION__, __LINE__);
+    printf("%s(%d) begin: %s----------------------------------------\n", __FUNCTION__, __LINE__, url);
     for (loop = 0; loop < xN; loop++) {
         // post away
         res = curl_easy_perform(curl_easy);
@@ -101,7 +101,7 @@ int curl_post_xml_xN() {
     int loop, xN = 3;
     CURL *curl_easy;
     CURLcode res;
-    char url[] = "http://demo6460359.mockable.io/tasks_postxml/v1/users";
+    char url[] = "https://demo6460359.mockable.io/tasks_postxml/v1/users";
     char post_data[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Person><ID>1</ID><Name>Ana Conda</Name><Email>a.conda@gmail.com</Email><Country>India</Country></Person>";
     struct curl_slist *headers = NULL;    
 
@@ -125,7 +125,7 @@ int curl_post_xml_xN() {
     // set data to post
     curl_easy_setopt(curl_easy, CURLOPT_POSTFIELDS, post_data);
 
-    printf("%s(%d) begin----------------------------------------\n", __FUNCTION__, __LINE__);
+    printf("%s(%d) begin: %s----------------------------------------\n", __FUNCTION__, __LINE__, url);
     for (loop = 0; loop < xN; loop++) {
         // post away
         res = curl_easy_perform(curl_easy);
@@ -144,7 +144,7 @@ int curl_post_appxwwwformurlencoded_xN() {
     int loop, xN = 3;
     CURL *curl_easy;
     CURLcode res;
-    char url[] = "http://demo6460359.mockable.io/tasks_post-x-www-form-urlencoded/v1/compareface";
+    char url[] = "https://demo6460359.mockable.io/tasks_post-x-www-form-urlencoded/v1/compareface";
     char post_data[] = "{\"img1base64\":\"xxxxxx\",\"img2base64\":\"yyyyyy\"}";
     struct curl_slist *headers = NULL;
 
@@ -168,7 +168,7 @@ int curl_post_appxwwwformurlencoded_xN() {
     // set data to post
     curl_easy_setopt(curl_easy, CURLOPT_POSTFIELDS, post_data);
 
-    printf("%s(%d) begin----------------------------------------\n", __FUNCTION__, __LINE__);
+    printf("%s(%d) begin: %s----------------------------------------\n", __FUNCTION__, __LINE__, url);
     for (loop = 0; loop < xN; loop++) {
         // post away
         res = curl_easy_perform(curl_easy);
