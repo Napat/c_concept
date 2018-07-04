@@ -1,0 +1,12 @@
+version: '2'
+services:
+  sftp:
+    image: atmoz/sftp
+    volumes:
+      - ./share:/home/foo/share
+      - ./users.conf:/etc/sftp-users.conf:ro
+      - ./documents:/home/foo/documents
+      - ./http:/home/bar/http
+    ports:
+      - "2222:22"
+    #command: foo:123:1001
