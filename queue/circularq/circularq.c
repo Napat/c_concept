@@ -18,7 +18,7 @@
     if (pthread_mutex_init(&queue->lock, attr) != 0)                            \
     {                                                                           \
         fprintf(stderr, "%s(%d) error init mutex\r\n", __FUNCTION__, __LINE__); \
-        return 1;                                                               \
+        return CIRCULARQ_RET_ERR;                                                               \
     }
 
 #define QMUTEX_LOCK(pq)         pthread_mutex_lock(&pq->lock)
@@ -26,16 +26,22 @@
 
 #endif
 
-uint16_t circularq_create(circularq_t *queue, uint32_t size){
+/**
+ * @brief Create queue buffer by dynamic allocate method(molloc)
+ *      ** NOT recommended for use on some uController that less memory or limited stack, 
+ *      use queue_create_without_malloc() with static variable instead **
+ * @return on success return CIRCULARQ_RET_OK, otherwise CIRCULARQ_RET_ERR
+ */
+circularq_ret_t circularq_create(circularq_t *queue, uint32_t size){
     if(queue == NULL){
         fprintf(stderr, "%s(%d) error\r\n", __FUNCTION__, __LINE__);
-        return -1;
+        return CIRCULARQ_RET_ERR;
     }
 
     queue->start = (uint8_t *)malloc(size);
     if(queue->start == NULL){
         fprintf(stderr, "%s(%d) error\r\n", __FUNCTION__, __LINE__);
-        return -1;
+        return CIRCULARQ_RET_ERR;
     }
 
     queue->end = (uint8_t *)(queue->start + size);
@@ -47,7 +53,28 @@ uint16_t circularq_create(circularq_t *queue, uint32_t size){
     // printf("queue->start: %p\n", queue->start);
     // printf("queue->end: %p\n", queue->end);
     // printf("queue->tail: %p\n", queue->tail);
-    return 0;
+    return CIRCULARQ_RET_OK;
+}
+
+/**
+ * @brief Sometimes we dont want to use malloc, i.e. uController
+ *          Or we want to use static buffer
+ * 
+ * @return on success return CIRCULARQ_RET_OK, otherwise CIRCULARQ_RET_ERR
+ */
+circularq_ret_t queue_create_without_malloc(circularq_t *queue, uint8_t* qbuffer, uint32_t size){
+    if (queue == (circularq_t *)0)
+        return CIRCULARQ_RET_ERR;
+
+    queue->start = qbuffer;
+    if (queue->start == NULL){
+        return CIRCULARQ_RET_ERR;
+    }
+
+    queue->end = (uint8_t *)((queue->start + size) - 1);
+    queue->tail = queue->head = queue->start;
+
+    return CIRCULARQ_RET_OK;
 }
 
 void circularq_destroy(circularq_t *queue){
@@ -56,6 +83,7 @@ void circularq_destroy(circularq_t *queue){
     }
 
     free(queue->start);
+    queue->start = NULL;
 }
 
 void circularq_discard(circularq_t *queue){
@@ -79,8 +107,7 @@ uint32_t circularq_freesize(circularq_t *queue){
     }
 
     if(queue->tail >= queue->head){
-        size = (uint32_t)((queue->end - queue->tail) +
-                      (queue->head - queue->start));    
+        size = (uint32_t)((queue->end - queue->tail) + (queue->head - queue->start));    
     }else{
         size = (uint32_t)(queue->head - queue->tail);   
     }
@@ -94,7 +121,7 @@ uint32_t circularq_freesize(circularq_t *queue){
 
 uint32_t circularq_usesize(circularq_t *queue){
     if((queue == (circularq_t *)0) || (queue->start == (uint8_t *)0)){
-        return 0xFFFF;
+        return 0xFFFFFFFF;
     }
 
     if(queue->tail >= queue->head){
@@ -112,9 +139,9 @@ uint32_t circularq_size(circularq_t *queue){
     return (uint32_t)(queue->end - queue->start) - 1;
 }
 
-uint32_t circularq_empty(circularq_t *queue){
+bool circularq_empty(circularq_t *queue){
     if((queue == (circularq_t *)0) || (queue->start == (uint8_t *)0)){
-        return 1;
+        return true;
     }
     //printf("%s(%d) head=%p tail=%p\r\n", __FUNCTION__, __LINE__, queue->head, queue->tail);
     return (queue->head == queue->tail);
@@ -169,7 +196,7 @@ uint32_t circularq_getfirst(circularq_t *queue, uint8_t *ch){
     return 1;
 }
 
-uint32_t circularq_getfirstw(circularq_t *queue, uint32_t *w){
+uint32_t circularq_getfirstw(circularq_t *queue, uint16_t *w){
     uint8_t *head;
 
     if((queue == (circularq_t *)0) || (queue->start == (uint8_t *)0)){
@@ -184,9 +211,9 @@ uint32_t circularq_getfirstw(circularq_t *queue, uint32_t *w){
 
     head = queue->head;
 
-    *w = (uint32_t)(*(head+1) << 8) | *head;
+    *w = (uint16_t)(*(head+1) << 8) | *head;
 
-    return 1;
+    return 1;   // return getsize= 1 word = 2 bytes
 }
 
 uint32_t circularq_get(circularq_t *queue, uint8_t *buff, uint32_t size){
@@ -194,7 +221,7 @@ uint32_t circularq_get(circularq_t *queue, uint8_t *buff, uint32_t size){
     uint8_t *head;
 
     if((queue == (circularq_t *)0) || (queue->start == (uint8_t *)0)){
-//      printf("!ERROR: Queue get().\r\n");
+        // printf("!ERROR: Queue get().\r\n");
         return 0;
     }
 
@@ -234,27 +261,27 @@ uint32_t circularq_putch(circularq_t *queue, uint8_t ch){
 
     freesize = circularq_freesize(queue);
 
+    // check q full
     if(freesize){
-        QMUTEX_LOCK(queue);
-
-        tail = queue->tail;
-
-        *tail++ = ch;
-        if(tail == queue->end){
-            tail = queue->start;
-        }
-
-        queue->tail = tail;
-
-        QMUTEX_UNLOCK(queue);
-        return 1;
-
-    } else{
         return 0;
     }
+
+    QMUTEX_LOCK(queue);
+
+    tail = queue->tail;
+
+    *tail++ = ch;
+    if(tail == queue->end){
+        tail = queue->start;
+    }
+
+    queue->tail = tail;
+
+    QMUTEX_UNLOCK(queue);
+    return 1;
 }
 
-uint32_t circularq_putw(circularq_t *queue, uint32_t w){
+uint32_t circularq_putw(circularq_t *queue, uint16_t w){
     uint32_t freesize;
     uint8_t *tail;
 
@@ -264,30 +291,30 @@ uint32_t circularq_putw(circularq_t *queue, uint32_t w){
 
     freesize = circularq_freesize(queue);
 
-    if(freesize > 4){
-        QMUTEX_LOCK(queue);
-
-        tail = queue->tail;
-
-        *tail++ = (uint8_t)(w & 0xFF);
-        if(tail == queue->end){
-            tail = queue->start;
-        }
-
-        *tail++ = (uint8_t)(w >> 8);
-        if(tail == queue->end){
-            tail = queue->start;
-        }
-
-        queue->tail = tail;
-
-        QMUTEX_UNLOCK(queue);
-
-        return 1;
-
-    } else{
-        return 0;
+    // check q full
+    if(freesize < 4){   
+        return 0;   
     }
+
+    QMUTEX_LOCK(queue);
+
+    tail = queue->tail;
+
+    *tail++ = (uint8_t)(w & 0xFF);
+    if(tail == queue->end){
+        tail = queue->start;
+    }
+
+    *tail++ = (uint8_t)(w >> 8);
+    if(tail == queue->end){
+        tail = queue->start;
+    }
+
+    queue->tail = tail;
+
+    QMUTEX_UNLOCK(queue);
+
+    return 1;   // putsize = 1 word = 2 bytes
 }
 
 uint32_t circularq_getch(circularq_t *queue, uint8_t *ch){
@@ -318,7 +345,7 @@ uint32_t circularq_getch(circularq_t *queue, uint8_t *ch){
     return 1;
 }
 
-uint32_t circularq_getw(circularq_t *queue, uint32_t *w){
+uint32_t circularq_getw(circularq_t *queue, uint16_t *w){
     uint8_t l, h;
     uint8_t *head;
 
@@ -350,7 +377,7 @@ uint32_t circularq_getw(circularq_t *queue, uint32_t *w){
 
     QMUTEX_UNLOCK(queue);
 
-    return 1;
+    return 1;   // get size 1 word = 2 bytes
 }
 
 static uint32_t internal_circularq_putdata(uint8_t is_autoreplace ,circularq_t *queue, uint8_t *dat, uint32_t size){
@@ -379,14 +406,14 @@ static uint32_t internal_circularq_putdata(uint8_t is_autoreplace ,circularq_t *
             return 0;
         }
     }else{
-         uint8_t is_qfull;
+        uint8_t is_qfull;
         // if qfull, deQ until enough space
         do{
             if(circularq_freesize(queue) <= (size+2)){
-                uint8_t dat[size*2];
+                uint8_t dat_discard[CIRCULARQ_MAX_PUTDATSIZE];
                 is_qfull = 1;
                 // Auto deQ
-                circularq_getdata(queue, dat);
+                circularq_getdata(queue, dat_discard);
             }else{
                 is_qfull = 0;
             }

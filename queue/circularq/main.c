@@ -19,7 +19,7 @@ int main(){
 	int32_t dat;
 	int32_t idx;
 
-	if( circularq_create(&ccq, QSIZEBYTE) != 0){
+	if( circularq_create(&ccq, QSIZEBYTE) != CIRCULARQ_RET_OK){
 		fprintf(stderr, "%s(%d)\n", __FUNCTION__, __LINE__);
 		exit(-1);
 	}
@@ -31,7 +31,7 @@ int main(){
 	// Put data
 	for( idx=0; idx < TESTLOOPDAT; idx++){
 		dat = 1000000+idx+1;
-		if( circularq_putdata(&ccq, (uint8_t*)&dat, sizeof(dat)) <= 0){
+		if( circularq_putdata(&ccq, (uint8_t*)&dat, sizeof(dat)) == 0){
             fprintf(stderr, "Error %s(%d): %d\n", __FUNCTION__, __LINE__, dat);
             fflush(stderr);
         }else{
@@ -40,8 +40,9 @@ int main(){
 	}
     
 	// Get data 
-	while(circularq_empty(&ccq) != 1){
-		if( circularq_getdata(&ccq, (uint8_t*)&dat) <= 0){
+	while(circularq_empty(&ccq) != true){
+		if( circularq_getdata(&ccq, (uint8_t*)&dat) == 0){
+			// q not emptry but can't get data then error
 			fprintf(stderr, "Error %s(%d)\n", __FUNCTION__, __LINE__);
             fflush(stderr);
         }else{
@@ -62,7 +63,7 @@ int main(){
 	}
 
 	// Get data 
-	while(circularq_empty(&ccq) != 1){
+	while(circularq_empty(&ccq) != true){
 		if( circularq_getdata(&ccq, (uint8_t*)&dat) <= 0){
 			fprintf(stderr, "Error %s(%d)\n", __FUNCTION__, __LINE__);
 		}else{
