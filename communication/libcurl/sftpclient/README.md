@@ -7,12 +7,35 @@
 และในการ compile libcurl ต้องใส่ ./configure --with-libssh2 เอาไว้ด้วย
 สามารถตรวจสอบโปรโตคอลที่รองรับได้ด้วยคำสั่ง
 
+## Install LIBCURL with SFTP
+
+- Installation Link: http://andrewberls.com/blog/post/adding-sftp-support-to-curl
+- https://github.com/curl/curl/blob/master/docs/INSTALL.md
+- https://www.libssh2.org/download/libssh2-1.9.0.tar.gz
+
+Install LIBSSH2
+
 ``` bash
-$ /usr/local/bin/curl -V
-curl 7.61.0-DEV (x86_64-pc-linux-gnu) libcurl/7.61.0-DEV OpenSSL/1.0.2g zlib/1.2.8 libssh2/1.8.1_DEV
-Release-Date: [unreleased]
-Protocols: dict file ftp ftps gopher http https imap imaps pop3 pop3s rtsp scp sftp smb smbs smtp smtps telnet tftp
-Features: AsynchDNS IPv6 Largefile NTLM NTLM_WB SSL libz TLS-SRP UnixSockets HTTPS-proxy
+wget --no-check-certificate https://www.libssh2.org/download/libssh2-1.9.0.tar.gz
+tar -xvzf libssh2-1.9.0.tar.gz
+cd libssh2-1.9.0/
+./configure
+make
+sudo make install
+```
+
+Now, install CURL with SFTP
+
+``` bash
+sudo apt-get install build-essential
+wget --no-check-certificate http://curl.haxx.se/download/curl-7.68.0.tar.gz
+tar -xvzf curl-7.68.0.tar.gz
+cd curl-7.68.0
+./configure --with-libssh2=/usr/local
+make
+sudo make install
+sudo ldconfig               # https://github.com/curl/curl/issues/4448
+curl -V | grep sftp
 ```
 
 ## Start sftp server
@@ -36,7 +59,6 @@ sftp_1  | Server listening on :: port 22.
 
 ## ทดสอบโปรแกรม
 
-
 ``` bash
 # Open new terminal
 $ make
@@ -46,21 +68,33 @@ ls: cannot access 'gettofile.bin': No such file or directory
 $ ls ../simulate_sftpserver/share/
 testfile
 $ cat ../simulate_sftpserver/share/testfile
-1234567890
+12345678901234567890
 $
 $ ./sftpclient
-$ ls gettofile.bin
-gettofile.bin
+12345678901234567
+$
+$ ls gettofile.*
+gettofile.bin  gettofile.bin_2
 $ cat gettofile.bin
-1234567890
+12345678901234567890
+$
+$ cat gettofile.bin_2
+12345678901234567890
 $
 $ ls ../simulate_sftpserver/share/
 putfile  testfile
+$
 $ cat ../simulate_sftpserver/share/putfile
-1234567890
-$ 
+1234567890as34567890
 ```
 
-## tools 
+## tools
 
 - [sftp server using docker](https://github.com/fixate/docker-sftp)
+
+## Other Resource
+
+- https://curl.haxx.se/libcurl/c/sftpget.html
+- https://curl.haxx.se/libcurl/c/sftpuploadresume.html
+- https://curl.haxx.se/libcurl/c/CURLOPT_RESUME_FROM.html
+- https://curl.haxx.se/libcurl/c/CURLOPT_RESUME_FROM_LARGE.html

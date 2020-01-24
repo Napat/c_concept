@@ -23,5 +23,6 @@ struct sftpfile_s
 
 void curl_sftp_init(void);
 int8_t curl_sftp_get(char *getfrom_sftpurl, char *getto_fullname);
+int8_t curl_sftp_get_resume(char* getfrom_sftpurl, char* getto_fullname);
 int8_t curl_sftp_put(const char *remotepath, const char *localpath);
 #endif /* __CURL_SFTP_H__ */
